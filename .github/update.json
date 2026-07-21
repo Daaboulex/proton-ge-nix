@@ -1,0 +1,27 @@
+{
+  "package": "proton-ge",
+  "upstream": {
+    "type": "github-release",
+    "owner": "GloriousEggroll",
+    "repo": "proton-ge-custom",
+    "tagFilter": "^GE-Proton"
+  },
+  "packageFile": "package.nix",
+  "hashes": ["hashX64", "hashArm64"],
+  "verify": {
+    "binary": null,
+    "check": "eval"
+  },
+  "description": "GE-Proton packaged for NixOS - prebuilt Steam compatibility tool tracking upstream daily, every variant",
+  "topics": [
+    "nix",
+    "nixos",
+    "flake",
+    "proton",
+    "proton-ge",
+    "ge-proton",
+    "steam",
+    "gaming",
+    "wine"
+  ]
+}
