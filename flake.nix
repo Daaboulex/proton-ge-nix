@@ -35,7 +35,7 @@
           checks.compat-tool-shape = pkgs.runCommand "proton-ge-shape" { } ''
             test -f "${self'.packages.default.steamcompattool}/compatibilitytool.vdf"
             test -e "${self'.packages.default.steamcompattool}/proton"
-            grep -q '"GE-Proton"' "${self'.packages.default.steamcompattool}/compatibilitytool.vdf"
+            grep -q '"GE-Proton' "${self'.packages.default.steamcompattool}/compatibilitytool.vdf"
             if grep -qF "${self'.packages.default.version}" "${self'.packages.default.steamcompattool}/compatibilitytool.vdf"; then
               echo "versioned identity leaked into the vdf" >&2
               exit 1
