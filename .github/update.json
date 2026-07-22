@@ -6,13 +6,13 @@
     "repo": "proton-ge-custom",
     "tagFilter": "^GE-Proton"
   },
-  "packageFile": "package.nix",
+  "packageFile": "sources.nix",
   "hashes": ["hashX64", "hashArm64"],
   "verify": {
     "binary": null,
     "check": "eval"
   },
-  "description": "GE-Proton packaged for NixOS - prebuilt Steam compatibility tool tracking upstream daily, every variant",
+  "description": "GE-Proton packaged for NixOS - rolling latest plus a pinned channel per major, tracking upstream daily",
   "topics": [
     "nix",
     "nixos",

@@ -1,5 +1,5 @@
 {
-  description = "GE-Proton packaged for NixOS - prebuilt Steam compatibility tool tracking upstream daily";
+  description = "GE-Proton packaged for NixOS - rolling latest plus a pinned channel per major, tracking upstream daily";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -26,26 +26,41 @@
       imports = [ inputs.std.flakeModules.base ];
 
       perSystem =
-        { pkgs, self', ... }:
+        { pkgs, lib, ... }:
+        let
+          assembled = pkgs.callPackage ./default.nix { };
+        in
         {
-          packages.default = pkgs.callPackage ./package.nix {
-            variant = if pkgs.stdenv.hostPlatform.isAarch64 then "aarch64" else "x86_64";
-          };
+          packages = {
+            default = assembled.proton-ge;
+          }
+          // assembled.channels;
 
-          checks.compat-tool-shape = pkgs.runCommand "proton-ge-shape" { } ''
-            test -f "${self'.packages.default.steamcompattool}/compatibilitytool.vdf"
-            test -e "${self'.packages.default.steamcompattool}/proton"
-            grep -q '"GE-Proton' "${self'.packages.default.steamcompattool}/compatibilitytool.vdf"
-            if grep -qF "${self'.packages.default.version}" "${self'.packages.default.steamcompattool}/compatibilitytool.vdf"; then
-              echo "versioned identity leaked into the vdf" >&2
-              exit 1
-            fi
-            touch "$out"
-          '';
+          checks.compat-tool-shape =
+            let
+              named = lib.mapAttrsToList (n: drv: {
+                inherit n;
+                tool = drv.steamcompattool;
+                ver = drv.version;
+              }) assembled.channels;
+            in
+            pkgs.runCommand "proton-ge-shape" { } ''
+              ${lib.concatMapStringsSep "\n" (c: ''
+                echo "checking channel ${c.n} (${c.ver})"
+                test -e "${c.tool}/proton"
+                test -f "${c.tool}/compatibilitytool.vdf"
+                grep -q '"GE-Proton' "${c.tool}/compatibilitytool.vdf"
+                if grep -qF "${c.ver}" "${c.tool}/compatibilitytool.vdf"; then
+                  echo "versioned identity ${c.ver} leaked into channel ${c.n}'s vdf" >&2
+                  exit 1
+                fi
+              '') named}
+              touch "$out"
+            '';
         };
 
       flake.overlays.default = final: _prev: {
-        proton-ge = inputs.self.packages.${final.system}.default;
+        proton-ge = (final.callPackage ./default.nix { }).proton-ge;
       };
     };
 }

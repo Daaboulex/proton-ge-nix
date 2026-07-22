@@ -2,29 +2,33 @@
   lib,
   stdenvNoCC,
   fetchzip,
+  tag,
+  hashX64,
+  hashArm64 ? null,
   variant ? "x86_64",
   steamDisplayName ? "GE-Proton",
 }:
 let
-  hashX64 = "sha256-I7SSvzQQ/NqdvwjpJ9IFFtAaTS+rgHUyXx0us1vIOnw=";
-  hashArm64 = "sha256-BT6yBrXL0iv+ylbxKrZB5L/NvJom+ZrdNrQDcZkSDVU=";
-  version = "GE-Proton11-1";
-  variantSrc =
-    asset: hash:
+  assetOf = v: if v == "aarch64" then "${tag}-aarch64.tar.gz" else "${tag}.tar.gz";
+  hashOf = v: if v == "aarch64" then hashArm64 else hashX64;
+  fetchVariant =
+    v:
     fetchzip {
-      url = "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/${version}/${asset}";
-      inherit hash;
+      url = "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/${tag}/${assetOf v}";
+      hash = hashOf v;
     };
   variantSrcs = {
-    x86_64 = variantSrc "${version}.tar.gz" hashX64;
-    aarch64 = variantSrc "${version}-aarch64.tar.gz" hashArm64;
+    x86_64 = fetchVariant "x86_64";
+  }
+  // lib.optionalAttrs (hashArm64 != null) {
+    aarch64 = fetchVariant "aarch64";
   };
 in
 stdenvNoCC.mkDerivation {
   pname = "proton-ge" + lib.optionalString (variant != "x86_64") "-${variant}";
-  inherit version;
+  version = tag;
 
-  src = variantSrcs.${variant};
+  src = fetchVariant variant;
 
   allVariantSources = lib.optionals (variant == "x86_64") (lib.attrValues variantSrcs);
 
@@ -45,12 +49,12 @@ stdenvNoCC.mkDerivation {
     rm $steamcompattool/compatibilitytool.vdf
     cp $src/compatibilitytool.vdf $steamcompattool
     substituteInPlace "$steamcompattool/compatibilitytool.vdf" \
-      --replace-fail "${version}" "${steamDisplayName}"
+      --replace-fail "${tag}" "${steamDisplayName}"
     runHook postInstall
   '';
 
   meta = {
-    description = "GE-Proton prebuilt Steam Play compatibility tool (${variant} build), stable GE-Proton dropdown identity";
+    description = "GE-Proton prebuilt Steam Play compatibility tool (${tag}, ${variant} build), stable dropdown identity";
     homepage = "https://github.com/GloriousEggroll/proton-ge-custom";
     license = lib.licenses.bsd3;
     platforms = if variant == "aarch64" then [ "aarch64-linux" ] else [ "x86_64-linux" ];
