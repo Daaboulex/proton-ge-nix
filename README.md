@@ -37,6 +37,21 @@ The `compatibilitytool.vdf` identity is normalized to the stable name `GE-Proton
 - **Upstream trust** - daily automated release detection, hash recomputation, and a verified test build, auto-committed to `main`
 - **Stale cleanup** - weekly `flake.lock` refresh (pushed only if it still builds); orphaned update branches older than 30 days are deleted
 
+## Channels
+
+Current pins as of 2026-07-23; the live truth is `sources.nix` (updated daily).
+
+| Attribute | Steam identity | Version |
+|---|---|---|
+| `latest` (`packages.default`, `pkgs.proton-ge`) | `GE-Proton` | GE-Proton11-1 |
+| `v11` | `GE-Proton 11` | GE-Proton11-1 |
+| `v10` | `GE-Proton 10` | GE-Proton10-34 |
+| `v9` | `GE-Proton 9` | GE-Proton9-21 |
+
+`latest` rolls with every upstream release; each `v<major>` stays on the newest
+pinned release of that major, so a game mapped to `GE-Proton 10` never silently
+changes wine major.
+
 <!-- BEGIN generated:installation -->
 ## Installation
 
