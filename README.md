@@ -30,7 +30,7 @@ Every variant upstream publishes is packaged:
 | `proton-ge` (`packages.default`) | `GE-ProtonX-Y.tar.gz` | `x86_64-linux` |
 | `proton-ge` (`packages.default`) | `GE-ProtonX-Y-aarch64.tar.gz` | `aarch64-linux` |
 
-The `compatibilitytool.vdf` identity is normalized to the stable name `GE-Proton` (the same normalization nixpkgs applies), so Steam's per-game Compatibility mapping survives every version bump - games mapped to `GE-Proton` transparently ride each update.
+Every channel gets a stable Steam identity written into its `compatibilitytool.vdf`: the rolling channel is `GE-Proton-latest`, each frozen pin is `GE-Proton <version>`, mirroring how Steam lists Proton. A game mapped to `GE-Proton-latest` rides every update; one mapped to a pin stays on that exact build.
 
 - **Package integrity** - SRI source hashes, verified on every build
 - **CI security** - pinned GitHub Actions (full SHA, not tags), minimal permissions, build-gated PRs
@@ -43,14 +43,16 @@ Current pins as of 2026-07-23; the live truth is `sources.nix` (updated daily).
 
 | Attribute | Steam identity | Version |
 |---|---|---|
-| `latest` (`packages.default`, `pkgs.proton-ge`) | `GE-Proton` | GE-Proton11-1 |
-| `v11` | `GE-Proton 11` | GE-Proton11-1 |
-| `v10` | `GE-Proton 10` | GE-Proton10-34 |
-| `v9` | `GE-Proton 9` | GE-Proton9-21 |
+| `latest` (`packages.default`, `pkgs.proton-ge`) | `GE-Proton-latest` | GE-Proton11-1 |
+| `v11` | `GE-Proton 11-1` | GE-Proton11-1 |
+| `v10` | `GE-Proton 10-34` | GE-Proton10-34 |
+| `v9` | `GE-Proton 9-21` | GE-Proton9-21 |
+| `v8` | `GE-Proton 8-32` | GE-Proton8-32 |
+| `v7` | `GE-Proton 7-55` | GE-Proton7-55 |
 
-`latest` rolls with every upstream release; each `v<major>` stays on the newest
-pinned release of that major, so a game mapped to `GE-Proton 10` never silently
-changes wine major.
+`latest` rolls with every upstream release; each `v<major>` is a frozen pin on
+that major's newest packaged release, so a game mapped to `GE-Proton 10-34`
+never silently changes underneath it.
 
 <!-- BEGIN generated:installation -->
 ## Installation
