@@ -89,7 +89,7 @@ programs.steam = {
 };
 ```
 
-Steam lists `GE-Proton` in each game's Compatibility dropdown. Pinning an older GE release is nix-native: pin this input to the flake revision that carried it (`git log` on this repo maps revisions to `GE-Proton*` versions).
+Steam lists `GE-Proton-latest` (plus each pinned major, e.g. `GE-Proton 10-34`) in each game's Compatibility dropdown. Pinning an older GE release is nix-native: use its frozen per-major channel - `pkgs.proton-ge.v10` after the overlay, or `inputs.proton-ge.packages.${pkgs.system}.v10`.
 
 ## License
 
