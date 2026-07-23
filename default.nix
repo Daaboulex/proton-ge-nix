@@ -26,13 +26,13 @@ let
       hashArm64 = allReleases.${tag}.hashArm64 or null;
     };
 
-  latestDrv = mk sources.version "GE-Proton";
+  latestDrv = mk sources.version "GE-Proton-latest";
 
   majorTags = lib.filter (tag: buildableHere allReleases.${tag}) (lib.attrNames allReleases);
   majorChannels = lib.listToAttrs (
     map (tag: {
       name = "v${majorOf tag}";
-      value = mk tag "GE-Proton ${majorOf tag}";
+      value = mk tag "GE-Proton ${lib.removePrefix "GE-Proton" tag}";
     }) majorTags
   );
 

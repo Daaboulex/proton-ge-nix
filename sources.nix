@@ -9,5 +9,11 @@
     "GE-Proton9-21" = {
       hashX64 = "sha256-WNOl0pu3xcEObxSK054u4e3hTWtA/51mH25uQih0+a0=";
     };
+    "GE-Proton8-32" = {
+      hashX64 = "sha256-ZBOF1N434pBQ+dJmzfJO9RdxRndxorxbJBZEIifp0w4=";
+    };
+    "GE-Proton7-55" = {
+      hashX64 = "sha256-6CL+9X4HBNoB/yUMIjA933XlSjE6eJC86RmwiJD6+Ws=";
+    };
   };
 }
