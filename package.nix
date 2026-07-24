@@ -3,34 +3,21 @@
   stdenvNoCC,
   fetchzip,
   tag,
-  hashX64,
-  hashArm64 ? null,
-  variant ? "x86_64",
+  variant,
+  hash,
   steamDisplayName ? "GE-Proton",
 }:
 let
-  assetOf = v: if v == "aarch64" then "${tag}-aarch64.tar.gz" else "${tag}.tar.gz";
-  hashOf = v: if v == "aarch64" then hashArm64 else hashX64;
-  fetchVariant =
-    v:
-    fetchzip {
-      url = "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/${tag}/${assetOf v}";
-      hash = hashOf v;
-    };
-  variantSrcs = {
-    x86_64 = fetchVariant "x86_64";
-  }
-  // lib.optionalAttrs (hashArm64 != null) {
-    aarch64 = fetchVariant "aarch64";
-  };
+  asset = if variant == "aarch64" then "${tag}-aarch64.tar.gz" else "${tag}.tar.gz";
 in
 stdenvNoCC.mkDerivation {
   pname = "proton-ge" + lib.optionalString (variant != "x86_64") "-${variant}";
   version = tag;
 
-  src = fetchVariant variant;
-
-  allVariantSources = lib.optionals (variant == "x86_64") (lib.attrValues variantSrcs);
+  src = fetchzip {
+    url = "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/${tag}/${asset}";
+    inherit hash;
+  };
 
   dontUnpack = true;
   dontConfigure = true;

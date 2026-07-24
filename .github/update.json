@@ -6,8 +6,14 @@
     "repo": "proton-ge-custom",
     "tagFilter": "^GE-Proton"
   },
-  "packageFile": "sources.nix",
-  "hashes": ["hashX64", "hashArm64"],
+  "packageFile": "package.nix",
+  "versionFile": "sources.nix",
+  "variantAssets": {
+    "sourceFile": "sources.nix",
+    "assetPrefix": "",
+    "assetSuffix": ".tar.gz",
+    "defaultVariant": "x86_64"
+  },
   "verify": {
     "binary": null,
     "check": "eval"

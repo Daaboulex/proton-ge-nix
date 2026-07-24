@@ -4,31 +4,29 @@
 }:
 let
   sources = import ./sources.nix;
-  isArm = pkgs.stdenv.hostPlatform.isAarch64;
-  variant = if isArm then "aarch64" else "x86_64";
+  variant = if pkgs.stdenv.hostPlatform.isAarch64 then "aarch64" else "x86_64";
 
   majorOf = tag: lib.head (builtins.match "GE-Proton([0-9]+)-.*" tag);
 
   allReleases = {
     ${sources.version} = {
-      inherit (sources) hashX64 hashArm64;
+      inherit (sources) variants;
     };
   }
   // sources.pins;
 
-  buildableHere = rel: if isArm then (rel.hashArm64 or null) != null else true;
+  buildableHere = tag: allReleases.${tag}.variants ? ${variant};
 
   mk =
     tag: steamDisplayName:
     pkgs.callPackage ./package.nix {
       inherit tag variant steamDisplayName;
-      hashX64 = allReleases.${tag}.hashX64;
-      hashArm64 = allReleases.${tag}.hashArm64 or null;
+      hash = allReleases.${tag}.variants.${variant};
     };
 
   latestDrv = mk sources.version "GE-Proton-latest";
 
-  majorTags = lib.filter (tag: buildableHere allReleases.${tag}) (lib.attrNames allReleases);
+  majorTags = lib.filter buildableHere (lib.attrNames allReleases);
   majorChannels = lib.listToAttrs (
     map (tag: {
       name = "v${majorOf tag}";
