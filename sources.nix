@@ -1,9 +1,9 @@
 {
-  version = "GE-Proton11-3";
+  version = "GE-Proton11-5";
   # std:variants-begin
   variants = {
-    aarch64 = "sha256-FIzjFRxy4mkHztTTDA/PvcOFSqwPOAKbJbCYcl3xVAY=";
-    x86_64 = "sha256-RiCmnUKeZRhPUCgm7fsROKFkAl37+/tYkA47tQtkIF4=";
+    aarch64 = "sha256-fS4N2ip8IvhMfrJsfHnrq+zA/41qJd6kbLQ0+5lZ5uE=";
+    x86_64 = "sha256-Sbyi5zXMhPIKSotvL5LEZ2dbDoLpXRcCyuY9TsnBnus=";
   };
   # std:variants-end
   pins = {
