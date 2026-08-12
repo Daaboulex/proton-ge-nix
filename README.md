@@ -96,7 +96,4 @@ Steam lists `GE-Proton-latest` (plus each pinned major, e.g. `GE-Proton 10-34`) 
 The packaging is MIT. GE-Proton itself is upstream's license (Valve Proton BSD-3-Clause lineage plus bundled components); this flake redistributes nothing - tarballs are fetched from upstream's GitHub releases at build time.
 
 <!-- BEGIN generated:footer -->
----
-
-*Maintained as part of the [Daaboulex](https://github.com/Daaboulex) NixOS ecosystem.*
 <!-- END generated:footer -->
