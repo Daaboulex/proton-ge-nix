@@ -8,14 +8,23 @@
   steamDisplayName ? "GE-Proton",
 }:
 let
-  asset = if variant == "aarch64" then "${tag}-aarch64.tar.gz" else "${tag}.tar.gz";
+  assets =
+    if variant == "aarch64" then
+      [ "${tag}-aarch64.tar.gz" ]
+    else
+      [
+        "${tag}-x86_64.tar.gz"
+        "${tag}.tar.gz"
+      ];
 in
 stdenvNoCC.mkDerivation {
   pname = "proton-ge" + lib.optionalString (variant != "x86_64") "-${variant}";
   version = tag;
 
   src = fetchzip {
-    url = "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/${tag}/${asset}";
+    urls = map (
+      asset: "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/${tag}/${asset}"
+    ) assets;
     inherit hash;
   };
 
