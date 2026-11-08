@@ -8,6 +8,7 @@
   },
   "packageFile": "package.nix",
   "versionFile": "sources.nix",
+  "majorPattern": "GE-Proton([0-9]+)-.*",
   "variantAssets": {
     "sourceFile": "sources.nix",
     "assetPrefix": "",
