@@ -68,8 +68,18 @@
             default = ge.tools.proton-ge;
           };
           checks.compat-tool-shape = ge.checks.compat-tool-shape;
+          checks.overlay-applies =
+            let
+              applied = pkgs.extend inputs.self.overlays.default;
+            in
+            pkgs.runCommand "overlay-applies" { } ''
+              test -n "${applied.proton-ge.version}"
+              test -n "${applied.proton-ge.v11.version}"
+              test -n "${applied.proton-ge-x86_64.version}"
+              touch $out
+            '';
         };
 
-      flake.overlays.default = final: _prev: (toolsFor final).tools;
+      flake.overlays.default = _final: prev: (toolsFor prev).tools;
     };
 }
