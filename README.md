@@ -35,7 +35,7 @@ A Nix flake that fetches the prebuilt GE-Proton release tarballs and exposes the
 
 ## Channels
 
-Every channel is a passthru of the tool attribute (`pkgs.proton-ge.v10`), never a top-level package. `latest` follows upstream's newest release; each `v<major>` is the last release of a closed line. When upstream opens a new major, the daily updater pins the outgoing release by itself (`majorPattern` in `.github/update.json`), so no channel vanishes and nobody edits a hash by hand.
+Every channel is a passthru of the tool attribute (`pkgs.proton-ge.v10`), never a top-level package. `latest` follows upstream's newest release; each `v<major>` is a line: the rolling line's channel follows its newest release and shows as a pin, a closed line's channel is its last release. When upstream opens a new major, the daily updater pins the outgoing release by itself (`majorPattern` in `.github/update.json`), so no channel vanishes and nobody edits a hash by hand.
 
 Each channel's `compatibilitytool.vdf` carries two names. The key, what Steam saves for a game's choice, is the attribute and the channel and never moves, so a choice survives every update and is the same for the aarch64 build and the x86_64 payload on one Steam root. The display name, what the dropdown shows, is `GE-Proton <major> (<release>, latest)` for the rolling channel and `GE-Proton <major> (<release>)` for a pin, so it says which release runs.
 
@@ -44,12 +44,13 @@ Pins as of 2026-11-08; the live truth is `sources.nix` (updated daily).
 | Channel | Key Steam saves | Dropdown | Release |
 |---|---|---|---|
 | `latest` | `proton-ge-latest` | `GE-Proton 11 (12, latest)` | GE-Proton11-12 |
+| `v11` | `proton-ge-v11` | `GE-Proton 11 (12)` | GE-Proton11-12, the rolling line |
 | `v10` | `proton-ge-v10` | `GE-Proton 10 (34)` | GE-Proton10-34 |
 | `v9` | `proton-ge-v9` | `GE-Proton 9 (27)` | GE-Proton9-27 |
 | `v8` | `proton-ge-v8` | `GE-Proton 8 (32)` | GE-Proton8-32 |
 | `v7` | `proton-ge-v7` | `GE-Proton 7 (55)` | GE-Proton7-55 |
 
-Upstream ships an aarch64 tarball since GE-Proton11-1, so on `aarch64-linux` the pins exist on `proton-ge-x86_64` alone. The pre-2022 `Proton-X.Y-GE-N` tags (4.x to 7.3) are a different tag and asset scheme and stay out.
+Upstream ships an aarch64 tarball since GE-Proton11-1, so on `aarch64-linux` `proton-ge` carries `latest` and `v11` and the older pins exist on `proton-ge-x86_64` alone. The pre-2022 `Proton-X.Y-GE-N` tags (4.x to 7.3) are a different tag and asset scheme and stay out.
 
 The keys replaced the versioned identities of earlier builds (`GE-Proton-latest`, `GE-Proton-latest-aarch64`, `GE-Proton 10-34`): a game mapped to one of those shows no tool until it is picked again, once.
 
