@@ -17,6 +17,39 @@
 
   outputs =
     inputs@{ flake-parts, ... }:
+    let
+      toolsFor =
+        pkgs:
+        inputs.std.lib.steamCompatTool {
+          inherit pkgs;
+          attribute = "proton-ge";
+          brand = "GE-Proton";
+          homepage = "https://github.com/GloriousEggroll/proton-ge-custom";
+          description = "GE-Proton prebuilt Steam Play compatibility tool";
+          license = pkgs.lib.licenses.bsd3;
+          sources = import ./sources.nix;
+          inherit (pkgs.lib.importJSON ./.github/update.json) majorPattern;
+          buildOf = tag: pkgs.lib.head (builtins.match "GE-Proton[0-9]+-(.*)" tag);
+          assetUrl =
+            tag: token:
+            "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/${tag}/${tag}${
+              if token == "x86_64" then "" else "-${token}"
+            }.tar.gz";
+          variantsOf = release: release.variants;
+          tokens = {
+            x86_64 = {
+              system = "x86_64-linux";
+              suffix = "";
+              qualifier = null;
+            };
+            aarch64 = {
+              system = "aarch64-linux";
+              suffix = "";
+              qualifier = null;
+            };
+          };
+        };
+    in
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
@@ -26,41 +59,17 @@
       imports = [ inputs.std.flakeModules.base ];
 
       perSystem =
-        { pkgs, lib, ... }:
+        { pkgs, ... }:
         let
-          assembled = pkgs.callPackage ./default.nix { };
+          ge = toolsFor pkgs;
         in
         {
-          packages = {
-            default = assembled.proton-ge;
-          }
-          // assembled.channels;
-
-          checks.compat-tool-shape =
-            let
-              named = lib.mapAttrsToList (n: drv: {
-                inherit n;
-                tool = drv.steamcompattool;
-                ver = drv.version;
-              }) assembled.channels;
-            in
-            pkgs.runCommand "proton-ge-shape" { } ''
-              ${lib.concatMapStringsSep "\n" (c: ''
-                echo "checking channel ${c.n} (${c.ver})"
-                test -e "${c.tool}/proton"
-                test -f "${c.tool}/compatibilitytool.vdf"
-                grep -q '"GE-Proton' "${c.tool}/compatibilitytool.vdf"
-                if grep -qF "${c.ver}" "${c.tool}/compatibilitytool.vdf"; then
-                  echo "versioned identity ${c.ver} leaked into channel ${c.n}'s vdf" >&2
-                  exit 1
-                fi
-              '') named}
-              touch "$out"
-            '';
+          packages = ge.tools // {
+            default = ge.tools.proton-ge;
+          };
+          checks.compat-tool-shape = ge.checks.compat-tool-shape;
         };
 
-      flake.overlays.default = final: _prev: {
-        inherit ((final.callPackage ./default.nix { })) proton-ge;
-      };
+      flake.overlays.default = final: _prev: (toolsFor final).tools;
     };
 }

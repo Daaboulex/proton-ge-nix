@@ -6,7 +6,7 @@
     "repo": "proton-ge-custom",
     "tagFilter": "^GE-Proton"
   },
-  "packageFile": "package.nix",
+  "packageFile": "flake.nix",
   "versionFile": "sources.nix",
   "majorPattern": "GE-Proton([0-9]+)-.*",
   "variantAssets": {
