@@ -1,47 +1,28 @@
 # proton-ge (Nix)
 
-<!-- BEGIN generated:badges -->
-[![CI](https://github.com/Daaboulex/proton-ge-nix/actions/workflows/ci.yml/badge.svg)](https://github.com/Daaboulex/proton-ge-nix/actions/workflows/ci.yml)
-[![NixOS unstable](https://img.shields.io/badge/NixOS-unstable-78C0E8?logo=nixos&logoColor=white)](https://nixos.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-<!-- END generated:badges -->
+[GE-Proton](https://github.com/GloriousEggroll/proton-ge-custom) by
+[GloriousEggroll](https://github.com/GloriousEggroll) is Valve's Proton with
+additional patches for games Valve's builds do not cover yet. This flake
+packages its prebuilt releases for NixOS, in the shape
+`programs.steam.extraCompatPackages` takes. It follows upstream's releases
+daily, for anyone who wants a new release without waiting for nixpkgs.
 
-Nix flake packaging for [GE-Proton](https://github.com/GloriousEggroll/proton-ge-custom) by [GloriousEggroll](https://github.com/GloriousEggroll) - Valve Proton with additional patches for games Valve's builds do not cover yet.
+It provides packages for `x86_64-linux` and `aarch64-linux`. The flake's check
+builds every release offered on the machine it runs on and confirms each one
+carries its `proton` entry point and its Steam manifests. Nothing here starts
+Steam or a game, so whether a release runs a given game is untested.
 
-<!-- BEGIN generated:upstream -->
-## Upstream
+## What you get
 
-| | |
-|---|---|
-| **Project** | [GloriousEggroll/proton-ge-custom](https://github.com/GloriousEggroll/proton-ge-custom) |
-| **License** | BSD-3-Clause (Valve Proton lineage) |
-| **Tracked** | GitHub releases (`GE-Proton*` tags, daily) |
+- `proton-ge` is the build for the machine's own architecture, x86_64 or
+  aarch64. It is also the flake's default package.
+- `proton-ge-x86_64` is the x86_64 build on either architecture, for an x86
+  Steam client running under FEX on aarch64. On an x86_64 machine it is the
+  same package as `proton-ge`.
 
-<!-- END generated:upstream -->
+## Install
 
-## What Is This?
-
-A Nix flake that fetches the prebuilt GE-Proton release tarballs and exposes them as two-output packages (`out` + `steamcompattool`) in the nixpkgs `proton-ge-bin` shape, so they drop straight into `programs.steam.extraCompatPackages`. It exists alongside nixpkgs' own `proton-ge-bin` for one reason: the daily update tracker here follows upstream releases directly, with no nixpkgs maintainer-merge lag. The packages are built by the fleet standard's `steamCompatTool`, so this flake carries only upstream's facts: the tag, the asset hashes, the brand and the major line.
-
-| Attribute | What it is | System |
-|---|---|---|
-| `proton-ge` (`packages.default`, `pkgs.proton-ge`) | the host's own build: `GE-ProtonX-Y.tar.gz` on `x86_64-linux`, `GE-ProtonX-Y-aarch64.tar.gz` on `aarch64-linux` | both |
-| `proton-ge-x86_64` | the x86_64 tarball on a host of either architecture, for an x86 Steam client running under FEX on aarch64; on `x86_64-linux` it is the same derivation as `proton-ge` | both |
-
-## Channels
-
-Every channel is a passthru of the tool attribute (`pkgs.proton-ge.v10`), never a top-level package. `latest` follows upstream's newest release; each `v<major>` is a line: the rolling line's channel follows its newest release and shows as a pin, a closed line's channel is its last release. When upstream opens a new major, the daily updater pins the outgoing release by itself (`majorPattern` in [`.github/update.json`](./.github/update.json)), so no channel vanishes and nobody edits a hash by hand.
-
-Each channel's `compatibilitytool.vdf` carries two names. The key, what Steam saves for a game's choice, is the attribute and the channel and never moves, so a choice survives every update and is the same for the aarch64 build and the x86_64 payload on one Steam root. The display name, what the dropdown shows, is `GE-Proton <major> (<release>, latest)` for the rolling channel and `GE-Proton <major> (<release>)` for a pin, so it says which release runs.
-
-The rolling release, the pinned releases and the assets of each are in [`sources.nix`](./sources.nix), which the daily updater moves.
-
-Upstream ships an aarch64 tarball since GE-Proton11-1, so on `aarch64-linux` `proton-ge` carries `latest` and `v11` and the older pins exist on `proton-ge-x86_64` alone. The pre-2022 `Proton-X.Y-GE-N` tags (4.x to 7.3) are a different tag and asset scheme and stay out.
-
-<!-- BEGIN generated:installation -->
-## Installation
-
-Add as a flake input:
+Add the flake:
 
 ```nix
 {
@@ -52,35 +33,69 @@ Add as a flake input:
 }
 ```
 
-Then either take the package directly:
+Then apply the overlay and hand the package to Steam:
+
+```nix
+{
+  nixpkgs.overlays = [ inputs.proton-ge.overlays.default ];
+
+  programs.steam = {
+    enable = true;
+    extraCompatPackages = [ pkgs.proton-ge ];
+  };
+}
+```
+
+Without the overlay, the same package is
+`inputs.proton-ge.packages.${pkgs.stdenv.hostPlatform.system}.default`.
+
+Steam lists it in each game's Compatibility dropdown.
+
+## Choosing a release
+
+`pkgs.proton-ge` follows upstream's newest release. The major lines are
+channels on the same attribute, never packages of their own:
 
 ```nix
 programs.steam.extraCompatPackages = [
-  inputs.proton-ge.packages.${pkgs.stdenv.hostPlatform.system}.default
+  pkgs.proton-ge
+  pkgs.proton-ge.v10
 ];
 ```
 
-or apply `inputs.proton-ge.overlays.default` and use `pkgs.proton-ge`.
+| Channel | What it is |
+|---|---|
+| `latest` | upstream's newest release, the same as the attribute alone |
+| `v<major>` of the line upstream is still releasing | the newest release of that line |
+| `v<major>` of a line upstream has closed | the last release of that line |
 
-<!-- END generated:installation -->
+Which releases those are today is in [sources.nix](sources.nix), which the
+daily updater moves.
 
-## Usage
+The dropdown shows `GE-Proton <major> (<release>, latest)` for `latest` and
+`GE-Proton <major> (<release>)` for a line, so the name says which release
+runs. A game keeps its choice through every update. The choice is also the
+same for the aarch64 build and the x86_64 build on one Steam root.
 
-```nix
-programs.steam = {
-  enable = true;
-  extraCompatPackages = [
-    pkgs.proton-ge
-    pkgs.proton-ge.v10
-  ];
-};
-```
+When upstream opens a new major, the updater keeps the outgoing line as a
+channel by itself, so no channel vanishes.
 
-Steam lists both in each game's Compatibility dropdown, under the display names the Channels section gives. `checks.compat-tool-shape` builds every channel of every variant and reads each vdf for the key and display formats.
+## Known limits
+
+- On `aarch64-linux`, `proton-ge` carries `latest` and `v11` only, because
+  upstream ships an aarch64 build since GE-Proton11-1. The older lines exist
+  on `proton-ge-x86_64` alone.
+- The pre-2022 releases tagged `Proton-X.Y-GE-N` (4.x to 7.3) are not
+  packaged.
+
+## More
+
+- [docs/DESIGN.md](docs/DESIGN.md): why it exists beside nixpkgs' own
+  `proton-ge-bin`, how the channels work, the two names Steam sees
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): building, the checks, how the
+  updater moves the releases
+- [SECURITY.md](SECURITY.md): how to report a security problem
 
 ## License
 
 The packaging is MIT. GE-Proton itself is upstream's license (Valve Proton BSD-3-Clause lineage plus bundled components); this flake redistributes nothing - tarballs are fetched from upstream's GitHub releases at build time.
-
-<!-- BEGIN generated:footer -->
-<!-- END generated:footer -->
