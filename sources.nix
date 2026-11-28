@@ -1,10 +1,16 @@
 {
   # std:rolling-begin
-  version = "GE-Proton11-12";
+  version = "GE-Proton11-14";
   # std:variants-begin
   variants = {
-    aarch64 = "sha256-0+ChUSgJa1IUl4yUIYAxP6hbY1oY48zzJYZkAcQZ/0Q=";
-    x86_64 = "sha256-i20g9lDz7bR0SXWmvHZHztN4m8AHkcD0/OVGSC4ZzI8=";
+    aarch64 = {
+      url = "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton11-14/GE-Proton11-14-aarch64.tar.gz";
+      hash = "sha256-n51sElFtNZQRJOpWdH1jpg+H0Wq7Q6TjCtg1wl3a44Y=";
+    };
+    x86_64 = {
+      url = "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton11-14/GE-Proton11-14-x86_64.tar.gz";
+      hash = "sha256-Bru3l0AqrvDl+XYC1dYhmy5XqKP49yFjWVJwZzel60Q=";
+    };
   };
   # std:variants-end
   # std:rolling-end
